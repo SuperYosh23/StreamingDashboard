@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Streaming Dashboard</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background-color: #0f0f0f;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 40px;
+      width: 600px;
+    }
+
+    .tile {
+      background-color: #1f1f1f;
+      border-radius: 20px;
+      box-shadow: 0 0 10px #000;
+      transition: transform 0.2s, box-shadow 0.2s;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .tile:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px #444;
+    }
+
+    .tile img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
+    .label {
+      margin-top: 10px;
+      font-size: 1em;
+      color: #ccc;
+    }
+
+    .tile.games .label {
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <a href="https://www.youtube.com" 
+     style="position: absolute; top: 0; left: 0; width: 10px; height: 10px; opacity: 0; z-index: 100;">
+  </a>
+
+  <div class="grid">
+    <a href="https://www.netflix.com" class="tile">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" alt="Netflix">
+      <div class="label">Netflix</div>
+    </a>
+    <a href="https://www.amazon.com/Amazon-Video/b/?&node=2858778011" class="tile">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/f/f1/Prime_Video.png" alt="Prime Video">
+      <div class="label">Prime Video</div>
+    </a>
+    <a href="https://www.disneyplus.com" class="tile">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg" alt="Disney+">
+      <div class="label">Disney+</div>
+    </a>
+    <a href="https://www.spotify.com" class="tile">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" alt="Spotify">
+      <div class="label">Spotify</div>
+    </a>
+    <a href="ituneslaunch://" class="tile">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/ITunes_12.2_logo.png/180px-ITunes_12.2_logo.png" alt="iTunes">
+      <div class="label">iTunes</div>
+    </a>
+    <a href="gam.html" class="tile games">
+      <img src="https://cdn4.iconfinder.com/data/icons/interface-essential-27/64/Layout_Dashboard_Dashboard_Interface_Interface_App-512.png" alt="Games">
+      <div class="label">Games</div>
+    </a>
+  </div>
+</body>
+</html>

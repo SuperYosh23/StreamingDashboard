@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Streaming Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --text: #e6ecf2;
+      --tile-bg: rgba(255, 255, 255, 0.08);
+      --tile-border: rgba(255, 255, 255, 0.18);
+      --glass-blur: 20px;
+      --radius-xl: 22px;
+      --tile-size: 130px;
+      --gap-xl: 28px;
+      --bg-gradient: linear-gradient(135deg, #330033, #001a4d, #660066, #001133);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg-gradient);
+      background-size: 400% 400%;
+      animation: gradientShift 20s ease infinite;
+      color: var(--text);
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Options button styled like a tile */
+    .options-btn {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      padding: 12px 18px;
+      border-radius: var(--radius-xl);
+      background: var(--tile-bg);
+      border: 1px solid var(--tile-border);
+      backdrop-filter: blur(var(--glass-blur));
+      color: var(--text);
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 120ms ease-out;
+      will-change: transform;
+      box-shadow: inset 0 8px 20px rgba(255,255,255,0.1),
+                  0 6px 18px rgba(0,0,0,0.4);
+      z-index: 1000;
+    }
+    .options-btn::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      opacity: 0;
+      transition: opacity 120ms ease-out;
+      will-change: opacity;
+      z-index: -1;
+      filter: blur(6px);
+      background: #6bc1ff; /* glow color */
+    }
+    body:not(.performance) .options-btn:hover { transform: scale(1.05); }
+    body:not(.performance) .options-btn:hover::after { opacity: 0.25; }
+
+    /* Options menu with animated reveal (no display toggling) */
+    .options-menu {
+      position: fixed;
+      top: 70px;
+      right: 16px;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      color: var(--text);
+      backdrop-filter: blur(14px) saturate(1.1);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+      z-index: 999;
+      min-width: 240px;
+      opacity: 0;
+      transform: translateY(-10px);
+      pointer-events: none;
+      transition: opacity 200ms ease, transform 200ms ease;
+    }
+    .options-menu.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .options-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .options-menu select {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      padding: 6px 10px;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 14px;
+      min-width: 140px;
+    }
+    .options-menu input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #6bc1ff;
+      cursor: pointer;
+    }
+    .options-menu .desc {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: var(--gap-xl);
+      width: 90%;
+      max-width: 900px;
+    }
+
+    .tile {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 14px;
+      border-radius: var(--radius-xl);
+      background: var(--tile-bg);
+      border: 1px solid var(--tile-border);
+      backdrop-filter: blur(var(--glass-blur));
+      text-decoration: none;
+      color: var(--text);
+      transition: transform 120ms ease-out;
+      will-change: transform;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 600ms ease-out forwards;
+    }
+
+    /* Staggered fade-in */
+    .tile:nth-child(1) { animation-delay: 0.1s; }
+    .tile:nth-child(2) { animation-delay: 0.2s; }
+    .tile:nth-child(3) { animation-delay: 0.3s; }
+    .tile:nth-child(4) { animation-delay: 0.4s; }
+    .tile:nth-child(5) { animation-delay: 0.5s; }
+    .tile:nth-child(6) { animation-delay: 0.6s; }
+    .tile:nth-child(7) { animation-delay: 0.7s; }
+
+    @keyframes fadeInUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .tile::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      opacity: 0;
+      transition: opacity 120ms ease-out;
+      will-change: opacity;
+      z-index: -1;
+      filter: blur(6px);
+    }
+
+    .icon-glass {
+      width: var(--tile-size);
+      height: var(--tile-size);
+      border-radius: 20px;
+      backdrop-filter: blur(12px) saturate(1.2);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.25);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: inset 0 8px 20px rgba(255,255,255,0.1),
+                  0 6px 18px rgba(0,0,0,0.4);
+      transition: transform 150ms ease-out, box-shadow 150ms ease-out;
+      will-change: transform, box-shadow;
+    }
+    .icon-glass img {
+      width: 70%;
+      height: 70%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .label {
+      margin-top: 12px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* Brand glow colors */
+    .tile.netflix::after   { background: #e50914; }
+    .tile.prime::after     { background: #00a8e1; }
+    .tile.disney::after    { background: #1f80e0; }
+    .tile.spotify::after   { background: #1db954; }
+    .tile.itunes::after    { background: #ea4cc0; }
+    .tile.games::after     { background: #6bc1ff; }
+    .tile.legacy::after    { background: #cccccc; }
+
+    /* Hover effects (disabled in performance mode) */
+    body:not(.performance) .tile:hover { transform: scale(1.05); }
+    body:not(.performance) .tile:hover::after { opacity: 0.25; }
+    body:not(.performance) .tile:hover .icon-glass {
+      transform: scale(1.1);
+      box-shadow: inset 0 10px 24px rgba(255,255,255,0.15),
+                  0 10px 24px rgba(0,0,0,0.6);
+    }
+  </style>
+</head>
+<body>
+  <!-- Options button and menu -->
+  <button class="options-btn" id="optionsBtn">Options</button>
+  <div class="options-menu" id="optionsMenu" aria-hidden="true">
+    <div class="options-row">
+      <select id="gradientSelect" aria-label="Background gradient">
+        <option value="purple">Purple Midnight</option>
+        <option value="ocean">Ocean Drift</option>
+        <option value="sunset">Sunset Glow</option>
+        <option value="forest">Forest Mist</option>
+        <option value="fire">Firestorm</option>
+        <option value="ice">Icy Aurora</option>
+        <option value="neon">Neon Lights</option>
+        <option value="earth">Earth Tones</option>
+        <option value="rose">Rose Mirage</option>
+        <option value="slate">Slate Sky</option>
+      </select>
+      <span class="desc">Background gradient</span>
+    </div>
+    <div class="options-row">
+      <label style="display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" id="performanceToggle" />
+        Performance mode
+      </label>
+      <span class="desc">Disables hover effects</span>
+    </div>
+  </div>
+
+  <!-- Tiles -->
+  <div class="grid">
+    <a href="https://www.netflix.com" class="tile netflix">
+      <div class="icon-glass">
+        <img loading="lazy" src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" alt="Netflix">
+      </div>
+      <div class="label">Netflix</div>
+    </a>
+    <a href="https://www.amazon.com/Amazon-Video/b/?&node=2858778011" class="tile prime">
+      <div class="icon-glass">
+        <img loading="lazy" src="https://upload.wikimedia.org/wikipedia/commons/f/f1/Prime_Video.png" alt="Prime Video">
+      </div>
+      <div class="label">Prime Video</div>
+    </a>
+    <a href="https://www.disneyplus.com" class="tile disney">
+      <div class="icon-glass">
+        <img loading="lazy" src="https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg" alt="Disney+">
+      </div>
+      <div class="label">Disney+</div>
+    </a>
+    <a href="https://www.spotify.com" class="tile spotify">
+      <div class="icon-glass">
+        <img loading="lazy" src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" alt="Spotify">
+      </div>
+      <div class="label">Spotify</div>
+    </a>
+    <a href="ituneslaunch://" class="tile itunes">
+      <div class="icon-glass">
+        <img loading="lazy" src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/ITunes_12.2_logo.png/180px-ITunes_12.2_logo.png" alt="iTunes">
+      </div>
+      <div class="label">iTunes</div>
+    </a>
+    <a href="gam.html" class="tile games">
+      <div class="icon-glass">
+        <img loading="lazy" src="https://cdn4.iconfinder.com/data/icons/interface-essential-27/64/Layout_Dashboard_Dashboard_Interface_Interface_App-512.png" alt="Games">
+      </div>
+      <div class="label">Games</div>
+    </a>
+    <a href="old.html" class="tile legacy">
+      <div class="icon-glass">
+        <img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/25/25694.png" alt="Legacy Dashboard">
+      </div>
+      <div class="label">Legacy Dashboard</div>
+    </a>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const optionsBtn = document.getElementById('optionsBtn');
+      const optionsMenu = document.getElementById('optionsMenu');
+      const gradientSelect = document.getElementById('gradientSelect');
+      const performanceToggle = document.getElementById('performanceToggle');
+
+      // Gradient presets
+      const gradients = {
+        purple: 'linear-gradient(135deg, #330033, #001a4d, #660066, #001133)',
+        ocean:  'linear-gradient(135deg, #042a2b, #0b3d91, #0a7c9d, #012a4a)',
+        sunset: 'linear-gradient(135deg, #2a0034, #7b1fa2, #ff6f61, #ff9a3c)',
+        forest: 'linear-gradient(135deg, #0b2e13, #1b4332, #2d6a4f, #081c15)',
+        fire:   'linear-gradient(135deg, #8a1c1c, #d94e1f, #f2b01e, #7a2f0f)',
+        ice:    'linear-gradient(135deg, #0a3a5f, #0f6aa5, #80eaff, #0a2540)',
+        neon:   'linear-gradient(135deg, #ff00cc, #00ffff, #ffff00, #00ff66)',
+        earth:  'linear-gradient(135deg, #3f2a2a, #8b5e3c, #c2b280, #3b5323)',
+        rose:   'linear-gradient(135deg, #3a0a2a, #a83279, #ff5f9e, #ffb3c1)',
+        slate:  'linear-gradient(135deg, #0f172a, #1e293b, #334155, #475569)'
+      };
+
+      const applyGradient = (key) => {
+        const val = gradients[key] || gradients.purple;
+        document.documentElement.style.setProperty('--bg-gradient', val);
+      };
+
+      // Persistent settings: load
+      const savedGradient = localStorage.getItem('gradient');
+      const savedPerf = localStorage.getItem('performance') === 'true';
+      if (savedGradient && gradients[savedGradient]) {
+        gradientSelect.value = savedGradient;
+        applyGradient(savedGradient);
+      } else {
+        applyGradient(gradientSelect.value);
+      }
+      if (savedPerf) {
+        performanceToggle.checked = true;
+        document.body.classList.add('performance');
+      }
+
+      // Options toggle
+      optionsBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const nowVisible = !optionsMenu.classList.contains('visible');
+        optionsMenu.classList.toggle('visible', nowVisible);
+        optionsMenu.setAttribute('aria-hidden', String(!nowVisible));
+      });
+
+      // Close on outside click or Escape
+      document.addEventListener('click', (e) => {
+        if (!optionsMenu.contains(e.target) && e.target !== optionsBtn) {
+          optionsMenu.classList.remove('visible');
+          optionsMenu.setAttribute('aria-hidden', 'true');
+        }
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          optionsMenu.classList.remove('visible');
+          optionsMenu.setAttribute('aria-hidden', 'true');
+        }
+      });
+
+      // Persist on change
+      gradientSelect.addEventListener('change', (e) => {
+        applyGradient(e.target.value);
+        localStorage.setItem('gradient', e.target.value);
+      });
+      performanceToggle.addEventListener('change', (e) => {
+        document.body.classList.toggle('performance', e.target.checked);
+        localStorage.setItem('performance', String(e.target.checked));
+      });
+    });
+  </script>
+</body>
+</html>
