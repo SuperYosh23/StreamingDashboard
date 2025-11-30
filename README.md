@@ -2,6 +2,18 @@
 
 A polished, responsive HTML/CSS/JS dashboard showcasing streaming service tiles with glassmorphism styling, animated background gradients, and a small options menu for runtime customization.
 
+This was originaly used on my Dell Optiplex 3010 running Windows 11 and a GameCube WaveBird Controller
+
+Mapped as:
+A:Click
+B:Browser Back
+Left Stick:Move Mouse
+Right Stick:Scroll
+L/R:Track Forward/Back
+Z:Play/Pause
+X/Y:Play/Pause
+Start:Open On-Screen Keyboard
+
 ### Features
 
 *   **Glassmorphism tiles** with brand glow and staggered entrance animations.
