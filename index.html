@@ -37,7 +37,7 @@
       100% { background-position: 0% 50%; }
     }
 
-    /* Options button styled like a tile */
+    /* Options button */
     .options-btn {
       position: fixed;
       top: 16px;
@@ -50,7 +50,7 @@
       color: var(--text);
       font-weight: 600;
       cursor: pointer;
-      transition: transform 120ms ease-out;
+      transition: transform 120ms ease-out, background 150ms ease, color 150ms ease;
       will-change: transform;
       box-shadow: inset 0 8px 20px rgba(255,255,255,0.1),
                   0 6px 18px rgba(0,0,0,0.4);
@@ -66,12 +66,20 @@
       will-change: opacity;
       z-index: -1;
       filter: blur(6px);
-      background: #6bc1ff; /* glow color */
+      background: #6bc1ff;
     }
     body:not(.performance) .options-btn:hover { transform: scale(1.05); }
     body:not(.performance) .options-btn:hover::after { opacity: 0.25; }
+    
+    /* Style for options button when in edit mode */
+    body.edit-mode .options-btn {
+      background: #6bc1ff;
+      color: #000;
+      border-color: #6bc1ff;
+    }
 
-    /* Options menu with animated reveal (no display toggling) */
+
+    /* Options menu */
     .options-menu {
       position: fixed;
       top: 70px;
@@ -104,7 +112,9 @@
       justify-content: space-between;
       gap: 10px;
     }
-    .options-menu select {
+    .options-menu select,
+    .options-menu .styled-btn,
+    .options-menu input[type="text"] {
       background: rgba(255,255,255,0.1);
       border: 1px solid rgba(255,255,255,0.2);
       border-radius: 8px;
@@ -112,8 +122,14 @@
       color: var(--text);
       cursor: pointer;
       font-size: 14px;
-      min-width: 140px;
     }
+    .options-menu .styled-btn.add-btn {
+      background: #1db954;
+      border-color: #1db954;
+      text-align: center;
+      width: 100%;
+    }
+
     .options-menu input[type="checkbox"] {
       width: 18px;
       height: 18px;
@@ -124,7 +140,29 @@
       font-size: 12px;
       opacity: 0.8;
     }
+    .options-menu hr {
+      border: none;
+      height: 1px;
+      background: rgba(255,255,255,0.2);
+      margin: 4px 0;
+    }
+    
+    /* Form for adding tiles */
+    .add-tile-form {
+      display: none; /* Hidden by default */
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .add-tile-form.visible {
+      display: flex; /* Show when 'add' is clicked */
+    }
+    .add-tile-form input[type="text"] {
+      width: 100%;
+    }
 
+
+    /* Grid */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -133,6 +171,7 @@
       max-width: 900px;
     }
 
+    /* Tiles */
     .tile {
       position: relative;
       display: flex;
@@ -145,21 +184,49 @@
       backdrop-filter: blur(var(--glass-blur));
       text-decoration: none;
       color: var(--text);
-      transition: transform 120ms ease-out;
-      will-change: transform;
+      transition: transform 120ms ease-out, opacity 120ms ease-out;
+      will-change: transform, opacity;
       opacity: 0;
       transform: translateY(20px);
       animation: fadeInUp 600ms ease-out forwards;
+      animation-delay: var(--animation-delay, 0s);
+      cursor: pointer;
+    }
+    
+    /* New 'Add Tile' Button Style */
+    .add-tile-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+      font-weight: 200;
+      color: rgba(255, 255, 255, 0.5);
+      border: 2px dashed rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.05);
+      min-height: 180px; /* Match tile height */
+    }
+    .add-tile-btn:hover {
+      color: rgba(255, 255, 255, 0.8);
+      border-color: rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* --- Drag and Drop Styles --- */
+    .tile.dragging {
+      opacity: 0.5; /* Make the tile being dragged transparent */
+    }
+    .tile.drag-over {
+      /* Highlight potential drop spots */
+      border-color: rgba(255, 255, 255, 0.7);
+      transform: scale(1.05);
+    }
+    /* Don't animate fade-in for drag/drop */
+    .tile.no-animation {
+      animation: none;
+      opacity: 1;
+      transform: translateY(0);
     }
 
-    /* Staggered fade-in */
-    .tile:nth-child(1) { animation-delay: 0.1s; }
-    .tile:nth-child(2) { animation-delay: 0.2s; }
-    .tile:nth-child(3) { animation-delay: 0.3s; }
-    .tile:nth-child(4) { animation-delay: 0.4s; }
-    .tile:nth-child(5) { animation-delay: 0.5s; }
-    .tile:nth-child(6) { animation-delay: 0.6s; }
-    .tile:nth-child(7) { animation-delay: 0.7s; }
 
     @keyframes fadeInUp {
       to { opacity: 1; transform: translateY(0); }
@@ -176,6 +243,48 @@
       z-index: -1;
       filter: blur(6px);
     }
+    
+    /* Remove Button (for edit mode) */
+    .remove-btn {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #e50914;
+      color: white;
+      border: 2px solid white;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: opacity 150ms ease, transform 150ms ease;
+      pointer-events: none;
+    }
+    body.edit-mode .remove-btn {
+      opacity: 1;
+      transform: scale(1);
+      pointer-events: auto;
+    }
+    body.edit-mode .tile {
+      animation: shake 0.5s infinite alternate; /* Wiggle effect */
+      cursor: grab;
+    }
+    body.edit-mode .tile:active {
+      cursor: grabbing;
+    }
+
+    @keyframes shake {
+      from { transform: rotate(-1deg); }
+      to { transform: rotate(1deg); }
+    }
+
 
     .icon-glass {
       width: var(--tile-size);
@@ -191,6 +300,7 @@
                   0 6px 18px rgba(0,0,0,0.4);
       transition: transform 150ms ease-out, box-shadow 150ms ease-out;
       will-change: transform, box-shadow;
+      pointer-events: none; /* Make icon unclickable so press goes to tile */
     }
     .icon-glass img {
       width: 70%;
@@ -203,6 +313,7 @@
       margin-top: 12px;
       font-weight: 600;
       color: var(--text);
+      pointer-events: none; /* Make label unclickable */
     }
 
     /* Brand glow colors */
@@ -213,21 +324,39 @@
     .tile.itunes::after    { background: #ea4cc0; }
     .tile.games::after     { background: #6bc1ff; }
     .tile.legacy::after    { background: #cccccc; }
-
-    /* Hover effects (disabled in performance mode) */
-    body:not(.performance) .tile:hover { transform: scale(1.05); }
+    .tile.default::after { background: #6bc1ff; }
+    
+    /* This new rule handles custom colors */
+    .tile.custom-glow::after { 
+      background: var(--tile-glow-color, #6bc1ff); 
+    }
+    
+    /* Hover effects */
+    body:not(.performance) .tile:hover { 
+      transform: scale(1.05);
+    }
+    body.edit-mode:not(.performance) .tile:hover {
+      transform: none; /* Override hover in edit mode */
+    }
+    
     body:not(.performance) .tile:hover::after { opacity: 0.25; }
+    
     body:not(.performance) .tile:hover .icon-glass {
       transform: scale(1.1);
       box-shadow: inset 0 10px 24px rgba(255,255,255,0.15),
                   0 10px 24px rgba(0,0,0,0.6);
     }
+    body.edit-mode:not(.performance) .tile:hover .icon-glass {
+      transform: none;
+      box-shadow: inset 0 8px 20px rgba(255,255,255,0.1),
+                  0 6px 18px rgba(0,0,0,0.4);
+    }
   </style>
 </head>
 <body>
-  <!-- Options button and menu -->
   <button class="options-btn" id="optionsBtn">Options</button>
   <div class="options-menu" id="optionsMenu" aria-hidden="true">
+    
     <div class="options-row">
       <select id="gradientSelect" aria-label="Background gradient">
         <option value="purple">Purple Midnight</option>
@@ -241,71 +370,41 @@
         <option value="rose">Rose Mirage</option>
         <option value="slate">Slate Sky</option>
       </select>
-      <span class="desc">Background gradient</span>
+      <span class="desc">Background</span>
     </div>
     <div class="options-row">
       <label style="display:flex;align-items:center;gap:8px;">
         <input type="checkbox" id="performanceToggle" />
         Performance mode
       </label>
-      <span class="desc">Disables hover effects</span>
+      <span class="desc">No hover</span>
     </div>
+    
+    <hr />
+
+    <form class="add-tile-form" id="addTileForm">
+      <input type="text" id="tileLabel" placeholder="Label (e.g., Netflix)" required>
+      <input type="text" id="tileUrl" placeholder="URL (e.g., https://netflix.com)" required>
+      <input type="text" id="tileImageUrl" placeholder="Image URL (e.g., .../logo.png)" required>
+      <input type="text" id="tileBrand" placeholder="Brand (e.g., netflix) or Color (e.g., #e50914)">
+      <button type="submit" class="styled-btn add-btn">Add Tile</button>
+    </form>
+
   </div>
 
-  <!-- Tiles -->
-  <div class="grid">
-    <a href="https://www.netflix.com" class="tile netflix">
-      <div class="icon-glass">
-        <img loading="lazy" src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" alt="Netflix">
-      </div>
-      <div class="label">Netflix</div>
-    </a>
-    <a href="https://www.amazon.com/Amazon-Video/b/?&node=2858778011" class="tile prime">
-      <div class="icon-glass">
-        <img loading="lazy" src="https://upload.wikimedia.org/wikipedia/commons/f/f1/Prime_Video.png" alt="Prime Video">
-      </div>
-      <div class="label">Prime Video</div>
-    </a>
-    <a href="https://www.disneyplus.com" class="tile disney">
-      <div class="icon-glass">
-        <img loading="lazy" src="https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg" alt="Disney+">
-      </div>
-      <div class="label">Disney+</div>
-    </a>
-    <a href="https://www.spotify.com" class="tile spotify">
-      <div class="icon-glass">
-        <img loading="lazy" src="https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg" alt="Spotify">
-      </div>
-      <div class="label">Spotify</div>
-    </a>
-    <a href="ituneslaunch://" class="tile itunes">
-      <div class="icon-glass">
-        <img loading="lazy" src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/ITunes_12.2_logo.png/180px-ITunes_12.2_logo.png" alt="iTunes">
-      </div>
-      <div class="label">iTunes</div>
-    </a>
-    <a href="gam.html" class="tile games">
-      <div class="icon-glass">
-        <img loading="lazy" src="https://cdn4.iconfinder.com/data/icons/interface-essential-27/64/Layout_Dashboard_Dashboard_Interface_Interface_App-512.png" alt="Games">
-      </div>
-      <div class="label">Games</div>
-    </a>
-    <a href="old.html" class="tile legacy">
-      <div class="icon-glass">
-        <img loading="lazy" src="https://cdn-icons-png.flaticon.com/512/25/25694.png" alt="Legacy Dashboard">
-      </div>
-      <div class="label">Legacy Dashboard</div>
-    </a>
-  </div>
+  <div class="grid" id="tileGrid"></div>
 
   <script>
     window.addEventListener('DOMContentLoaded', () => {
+      // --- Get Elements ---
       const optionsBtn = document.getElementById('optionsBtn');
       const optionsMenu = document.getElementById('optionsMenu');
       const gradientSelect = document.getElementById('gradientSelect');
       const performanceToggle = document.getElementById('performanceToggle');
+      const tileGrid = document.getElementById('tileGrid');
+      const addTileForm = document.getElementById('addTileForm');
 
-      // Gradient presets
+      // --- Data ---
       const gradients = {
         purple: 'linear-gradient(135deg, #330033, #001a4d, #660066, #001133)',
         ocean:  'linear-gradient(135deg, #042a2b, #0b3d91, #0a7c9d, #012a4a)',
@@ -318,59 +417,334 @@
         rose:   'linear-gradient(135deg, #3a0a2a, #a83279, #ff5f9e, #ffb3c1)',
         slate:  'linear-gradient(135deg, #0f172a, #1e293b, #334155, #475569)'
       };
+      
+      const defaultTiles = [
+        { label: 'Netflix', url: 'https://www.netflix.com', img: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg', glow: 'netflix' },
+        { label: 'Prime Video', url: 'https://www.amazon.com/Amazon-Video/b/?&node=2858778011', img: 'https://upload.wikimedia.org/wikipedia/commons/f/f1/Prime_Video.png', glow: 'prime' },
+        { label: 'Disney+', url: 'https://www.disneyplus.com', img: 'https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg', glow: 'disney' },
+        { label: 'Spotify', url: 'https://www.spotify.com', img: 'https://upload.wikimedia.org/wikipedia/commons/1/19/Spotify_logo_without_text.svg', glow: 'spotify' },
+        { label: 'iTunes', url: 'ituneslaunch://', img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/ITunes_12.2_logo.png/180px-ITunes_12.2_logo.png', glow: 'itunes' },
+        { label: 'Games', url: 'gam.html', img: 'https://cdn4.iconfinder.com/data/icons/interface-essential-27/64/Layout_Dashboard_Dashboard_Interface_Interface_App-512.png', glow: 'games' },
+        { label: 'Legacy', url: 'old.html', img: 'https://cdn-icons-png.flaticon.com/512/25/25694.png', glow: 'legacy' }
+      ];
 
+      let currentTiles = [];
+      let longPressTimer = null;
+      let draggedIndex = null; 
+
+      // --- Functions ---
+      
       const applyGradient = (key) => {
         const val = gradients[key] || gradients.purple;
         document.documentElement.style.setProperty('--bg-gradient', val);
       };
 
-      // Persistent settings: load
-      const savedGradient = localStorage.getItem('gradient');
-      const savedPerf = localStorage.getItem('performance') === 'true';
-      if (savedGradient && gradients[savedGradient]) {
-        gradientSelect.value = savedGradient;
-        applyGradient(savedGradient);
-      } else {
-        applyGradient(gradientSelect.value);
-      }
-      if (savedPerf) {
-        performanceToggle.checked = true;
-        document.body.classList.add('performance');
-      }
+      const saveTiles = () => {
+        localStorage.setItem('dashboardTiles', JSON.stringify(currentTiles));
+      };
 
-      // Options toggle
+      // --- Edit Mode Functions ---
+      const enterEditMode = () => {
+        if (body.classList.contains('edit-mode')) return; 
+        
+        body.classList.add('edit-mode');
+        optionsBtn.textContent = 'Done Editing';
+        optionsMenu.classList.remove('visible');
+        optionsMenu.setAttribute('aria-hidden', 'true');
+        addTileForm.classList.remove('visible');
+        renderTiles(true); 
+      };
+
+      const exitEditMode = () => {
+        if (!body.classList.contains('edit-mode')) return; 
+
+        body.classList.remove('edit-mode');
+        optionsBtn.textContent = 'Options';
+        addTileForm.classList.remove('visible'); 
+        renderTiles(true); 
+      };
+      
+      // --- Render Function ---
+      const renderTiles = (noAnimation = false) => {
+        tileGrid.innerHTML = '';
+        const inEditMode = body.classList.contains('edit-mode');
+        
+        currentTiles.forEach((tile, index) => {
+          const tileElement = document.createElement('a');
+          tileElement.href = tile.url;
+          
+          // --- JS FIX (Case-sensitivity) ---
+          const glowValue = tile.glow || 'default';
+          const glowLower = glowValue.toLowerCase(); // Convert to lowercase ONCE
+          let baseClass = 'tile ';
+          
+          // Check if the glow value is a color
+          if (glowValue.startsWith('#') || 
+              glowLower.startsWith('rgb') || // Check lowercase
+              glowLower.startsWith('hsl') || // Check lowercase
+              ['red', 'blue', 'green', 'yellow', 'orange', 'purple', 'white', 'black', 'pink', 'cyan', 'magenta'].includes(glowLower)) { // Check lowercase
+            
+            // Use the original glowValue (e.g., "Yellow") as CSS color names are not case-sensitive
+            tileElement.style.setProperty('--tile-glow-color', glowValue); 
+            baseClass += 'custom-glow';
+          } else {
+            // It's a brand name class, use the original value
+            baseClass += glowValue;
+          }
+          tileElement.className = baseClass;
+          // --- End of JS FIX ---
+
+          if (noAnimation) tileElement.classList.add('no-animation');
+          tileElement.style.setProperty('--animation-delay', `${index * 100}ms`);
+          tileElement.dataset.index = index; 
+          
+          tileElement.setAttribute('draggable', inEditMode);
+          
+          tileElement.innerHTML = `
+            <button class="remove-btn" data-index="${index}">×</button>
+            <div class="icon-glass">
+              <img loading="lazy" src="${tile.img}" alt="${tile.label}">
+            </div>
+            <div class="label">${tile.label}</div>
+          `;
+          
+          tileGrid.appendChild(tileElement);
+        });
+        
+        // Add the 'Add New Tile' button
+        if (inEditMode) {
+          const addBtn = document.createElement('div');
+          addBtn.className = 'tile add-tile-btn';
+          
+          if (noAnimation) {
+            addBtn.classList.add('no-animation');
+          }
+          
+          addBtn.textContent = '+';
+          addBtn.addEventListener('click', () => {
+            optionsMenu.classList.add('visible');
+            addTileForm.classList.add('visible');
+            optionsMenu.setAttribute('aria-hidden', 'false');
+          });
+          tileGrid.appendChild(addBtn);
+        }
+
+        // Add remove listeners
+        document.querySelectorAll('.remove-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault(); 
+            e.stopPropagation(); 
+            
+            const indexToRemove = parseInt(e.target.dataset.index, 10);
+            currentTiles.splice(indexToRemove, 1);
+            saveTiles();
+            renderTiles(true); 
+          });
+        });
+      };
+
+      // --- Load Function ---
+      const loadSettings = () => {
+        // Load Gradient
+        const savedGradient = localStorage.getItem('gradient');
+        if (savedGradient && gradients[savedGradient]) {
+          gradientSelect.value = savedGradient;
+          applyGradient(savedGradient);
+        } else {
+          applyGradient(gradientSelect.value);
+        }
+        
+        // Load Performance Mode
+        const savedPerf = localStorage.getItem('performance') === 'true';
+        if (savedPerf) {
+          performanceToggle.checked = true;
+          body.classList.add('performance');
+        }
+        
+        // Load Tiles
+        try {
+          const savedTiles = localStorage.getItem('dashboardTiles');
+          if (savedTiles) {
+            currentTiles = JSON.parse(savedTiles);
+            if (!Array.isArray(currentTiles)) currentTiles = [...defaultTiles];
+          } else {
+            currentTiles = [...defaultTiles];
+          }
+        } catch (e) {
+          console.error("Error parsing saved tiles, using defaults:", e);
+          currentTiles = [...defaultTiles];
+        }
+        
+        renderTiles();
+      };
+
+      // --- Initial Load ---
+      const body = document.body;
+      loadSettings();
+
+
+      // --- Event Listeners ---
+
+      // Options Button
       optionsBtn.addEventListener('click', (e) => {
         e.stopPropagation();
+        if (body.classList.contains('edit-mode')) {
+          exitEditMode();
+          return;
+        }
+        
         const nowVisible = !optionsMenu.classList.contains('visible');
         optionsMenu.classList.toggle('visible', nowVisible);
         optionsMenu.setAttribute('aria-hidden', String(!nowVisible));
+        if (nowVisible) {
+          addTileForm.classList.remove('visible');
+        }
       });
 
-      // Close on outside click or Escape
+      // Close menu on outside click
       document.addEventListener('click', (e) => {
-        if (!optionsMenu.contains(e.target) && e.target !== optionsBtn) {
+        const isAddButton = e.target.classList.contains('add-tile-btn');
+        if (!optionsMenu.contains(e.target) && e.target !== optionsBtn && !isAddButton) {
           optionsMenu.classList.remove('visible');
           optionsMenu.setAttribute('aria-hidden', 'true');
         }
       });
+      
+      // Close menu on Escape
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
           optionsMenu.classList.remove('visible');
           optionsMenu.setAttribute('aria-hidden', 'true');
+          if (body.classList.contains('edit-mode')) {
+            exitEditMode();
+          }
         }
       });
 
-      // Persist on change
+      // Persist Settings
       gradientSelect.addEventListener('change', (e) => {
         applyGradient(e.target.value);
         localStorage.setItem('gradient', e.target.value);
       });
       performanceToggle.addEventListener('change', (e) => {
-        document.body.classList.toggle('performance', e.target.checked);
+        body.classList.toggle('performance', e.target.checked);
         localStorage.setItem('performance', String(e.target.checked));
       });
+      
+      // Add Tile Form
+      addTileForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const rawUrl = document.getElementById('tileUrl').value;
+        let finalUrl = rawUrl;
+        
+        if (!rawUrl.includes('://') && !rawUrl.startsWith('mailto:') && !rawUrl.startsWith('#')) {
+          finalUrl = 'https://' + rawUrl;
+        }
+        
+        const glowValue = document.getElementById('tileBrand').value;
+        
+        const newTile = {
+          label: document.getElementById('tileLabel').value,
+          url: finalUrl, 
+          img: document.getElementById('tileImageUrl').value,
+          glow: glowValue || 'default' // Use 'glow' key
+        };
+        
+        currentTiles.push(newTile);
+        saveTiles();
+        renderTiles(true); 
+        addTileForm.reset();
+        
+        optionsMenu.classList.remove('visible');
+        optionsMenu.setAttribute('aria-hidden', 'true');
+      });
+      
+      // --- Long Press Logic (Event Delegation) ---
+      const clearLongPressTimer = () => {
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+      };
+
+      tileGrid.addEventListener('mousedown', (e) => {
+        if (body.classList.contains('edit-mode')) return; 
+        const tile = e.target.closest('.tile');
+        if (tile) {
+          longPressTimer = setTimeout(() => {
+            enterEditMode();
+          }, 1000); // 1 second
+        }
+      });
+      tileGrid.addEventListener('mouseup', clearLongPressTimer);
+      tileGrid.addEventListener('mouseleave', clearLongPressTimer);
+      tileGrid.addEventListener('dragstart', clearLongPressTimer);
+      
+      // Prevent context menu
+      tileGrid.addEventListener('contextmenu', (e) => {
+         const tile = e.target.closest('.tile');
+         if(tile) e.preventDefault();
+      });
+      
+      
+      // --- Drag and Drop Logic (Event Delegation) ---
+      tileGrid.addEventListener('dragstart', (e) => {
+        const tile = e.target.closest('.tile');
+        if (tile && body.classList.contains('edit-mode') && !tile.classList.contains('add-tile-btn')) {
+          draggedIndex = parseInt(tile.dataset.index, 10);
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', draggedIndex);
+          setTimeout(() => tile.classList.add('dragging'), 0);
+        } else {
+          e.preventDefault();
+        }
+      });
+      
+      tileGrid.addEventListener('dragend', (e) => {
+        const tile = e.target.closest('.tile');
+        if (tile) tile.classList.remove('dragging');
+        draggedIndex = null;
+        document.querySelectorAll('.drag-over').forEach(t => t.classList.remove('drag-over'));
+      });
+      
+      tileGrid.addEventListener('dragover', (e) => {
+        e.preventDefault(); 
+        const tile = e.target.closest('.tile');
+        if (tile && !tile.classList.contains('add-tile-btn')) {
+          e.dataTransfer.dropEffect = 'move';
+          document.querySelectorAll('.drag-over').forEach(t => t.classList.remove('drag-over'));
+          tile.classList.add('drag-over');
+        } else {
+          e.dataTransfer.dropEffect = 'none';
+        }
+      });
+
+      tileGrid.addEventListener('dragleave', (e) => {
+        const tile = e.target.closest('.tile');
+        if (tile) {
+          tile.classList.remove('drag-over');
+        }
+      });
+
+      tileGrid.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const dropTile = e.target.closest('.tile');
+        if (!dropTile || draggedIndex === null || dropTile.classList.contains('add-tile-btn')) {
+             document.querySelectorAll('.drag-over').forEach(t => t.classList.remove('drag-over'));
+            return;
+        }
+
+        const droppedOnIndex = parseInt(dropTile.dataset.index, 10);
+        
+        const item = currentTiles.splice(draggedIndex, 1)[0];
+        currentTiles.splice(droppedOnIndex, 0, item);
+        
+        saveTiles();
+        renderTiles(true); 
+      });
+
     });
   </script>
 </body>
 </html>
-
