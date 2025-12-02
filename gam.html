@@ -2,236 +2,354 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Games</title>
-    <link rel="icon" href="game.png">
-    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Games</title>
+  <link rel="icon" href="game.png">
+  <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <style>
-        body {
-            background: url('your-background-image.jpg') no-repeat center/cover;
-            font-family: 'Comfortaa', sans-serif;
-            margin: 0;
-            color: #f6f6f6;
-            display: flex;
-            flex-direction: row;
-            height: 100vh;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-            background-color: rgba(24, 24, 24, 0.2);
-        }
+  <style>
+    /* --- Imported from Dashboard --- */
+    :root {
+      --text: #e6ecf2;
+      --tile-bg: rgba(255, 255, 255, 0.08);
+      --tile-border: rgba(255, 255, 255, 0.18);
+      --glass-blur: 20px;
+      --radius-xl: 22px;
+      --radius-l: 14px;
+      --hover-glow: #6bc1ff;
+      /* This is now just a fallback, JS will override it */
+      --bg-gradient: linear-gradient(135deg, #330033, #001a4d, #660066, #001133);
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
 
-        header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: linear-gradient(90deg, #00ff7f, #007500);
-            padding: 20px 30px;
-            font-size: 32px;
-            font-weight: 700;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-            z-index: 2;
-        }
+    body {
+      background: var(--bg-gradient);
+      background-size: 400% 400%;
+      animation: gradientShift 20s ease infinite;
+      
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      color: var(--text);
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+      overflow: hidden;
+    }
 
-        .main-container {
-            display: flex;
-            flex: 1;
-            margin-top: 80px;
-        }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    /* --- End of Imported Styles --- */
 
-        .game-bar {
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-            overflow-x: hidden;
-            height: calc(100vh - 80px);
-            width: 120px;
-            background: #2a2a2a;
-            border-right: 2px solid #00ff7f;
-            padding-top: 10px;
-            box-sizing: border-box;
-        }
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      
+      background: var(--tile-bg);
+      backdrop-filter: blur(var(--glass-blur));
+      border-bottom: 1px solid var(--tile-border);
+      
+      padding: 18px 30px;
+      font-size: 28px;
+      font-weight: 600;
+      z-index: 2;
+    }
 
-        .game-card {
-            flex: 0 0 auto;
-            position: relative;
-            border-radius: 10px;
-            width: 98px;
-            height: 98px;
-            margin: 10px auto;
-            overflow: hidden;
-            text-align: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-            background-color: #000;
-        }
+    .main-container {
+      display: flex;
+      flex: 1;
+      margin-top: 80px; 
+      height: calc(100vh - 80px);
+    }
 
-        .blur-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-size: cover;
-            background-position: center;
-            filter: blur(5px);
-            z-index: 0;
-        }
+    .game-bar {
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+      width: 140px; 
+      
+      background: var(--tile-bg);
+      backdrop-filter: blur(var(--glass-blur));
+      border-right: 1px solid var(--tile-border);
 
-        .game-card span {
-            position: absolute;
-            z-index: 1;
-            color: white;
-            bottom: 5px;
-            left: 0;
-            right: 0;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px black;
-        }
+      padding: 10px;
+      gap: 12px;
+      box-sizing: border-box;
+    }
 
-        .game-card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 20px rgba(0, 255, 127, 0.5);
-        }
+    /* Custom scrollbar for game bar */
+    .game-bar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .game-bar::-webkit-scrollbar-thumb {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+    .game-bar::-webkit-scrollbar-track {
+      background: transparent;
+    }
 
-        .game-display {
-            flex: 1;
-            background-color: #252525;
-            border-radius: 10px;
-            margin: 10px;
-            position: relative;
-            overflow: hidden;
-        }
+    .game-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      
+      width: 100%; 
+      height: 120px;
+      margin: 0; 
+      
+      background: var(--tile-bg);
+      border: 1px solid var(--tile-border);
+      border-radius: var(--radius-l);
+      
+      padding: 10px;
+      text-align: center;
+      color: var(--text);
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      position: relative; 
+      overflow: hidden;
+    }
+    
+    .game-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      opacity: 0;
+      transition: opacity 120ms ease-out;
+      will-change: opacity;
+      z-index: -1;
+      filter: blur(6px);
+      background: var(--hover-glow); 
+    }
 
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            display: none;
-            border-radius: 10px;
-        }
+    .blur-background {
+      position: relative;
+      width: 60px;
+      height: 60px;
+      border-radius: 12px;
+      
+      background-size: contain; 
+      background-position: center;
+      background-repeat: no-repeat;
+      
+      filter: none;
+      z-index: 1;
+      margin-bottom: 8px;
+    }
 
-        .loading-overlay {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-        }
-    </style>
+    .game-card span {
+      position: relative;
+      bottom: auto;
+      left: auto;
+      right: auto;
+      
+      font-weight: 600;
+      font-size: 12px;
+      text-shadow: none;
+      z-index: 1;
+      line-height: 1.3;
+    }
+
+    .game-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 20px rgba(107, 193, 255, 0.3);
+    }
+    
+    .game-card:hover::after {
+       opacity: 0.25;
+    }
+
+    .game-display {
+      flex: 1;
+      background: var(--tile-bg);
+      backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--tile-border);
+      
+      border-radius: var(--radius-l);
+      margin: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: none; /* Hidden by default */
+      border-radius: var(--radius-l);
+    }
+
+    .loading-overlay {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(10px);
+      
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-l);
+      font-size: 24px;
+      font-weight: 600;
+    }
+  </style>
 </head>
 
 <body>
 
-<header>
+  <header>
     <div>SuperYosh23's Games for TV</div>
-</header>
+  </header>
 
-<div class="main-container">
+  <div class="main-container">
     <div class="game-bar">
-        <button class="game-card" data-game="game1">
-            <div class="blur-background" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/e/e7/Doodle_Jump.png')"></div>
-            <span>Doodle Jump</span>
-        </button>
-        <button class="game-card" data-game="game2">
-            <div class="blur-background" style="background-image:url('https://www.speedrun.com/static/game/9d3mqy6l/cover.png?v=b42fffe')"></div>
-            <span>Flappy Bird</span>
-        </button>
-        <button class="game-card" data-game="game4">
-            <div class="blur-background" style="background-image:url('https://cdn2.steamgriddb.com/icon_thumb/833cc7b10966fa0202801496bffccb37.png?v=b30ad497')"></div>
-            <span>Run 3</span>
-        </button>
-        <button class="game-card" data-game="game3">
-            <div class="blur-background" style="background-image:url('https://static.wikia.nocookie.net/operius/images/3/3f/Operius.png')"></div>
-            <span>Operius</span>
-        </button>
-        <button class="game-card" data-game="game8">
-            <div class="blur-background" style="background-image:url('https://static.wikia.nocookie.net/angrybirds/images/7/70/AngryBirds_Classic_GameIcon_Vector_2.png/revision/latest/scale-to-width-down/250?cb=20220626150110')"></div>
-            <span>Angry Birds</span>
-        </button>
-        <!-- New Friday Night Funkin' tile -->
-        <button class="game-card" data-game="game9">
-            <div class="blur-background" style="background-image:url('https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F26%2F0f%2F15%2F260f15ec775e77a7c1de289e5376389f.jpg&f=1&nofb=1&ipt=6101e1619edc6bb38aa3b9cbe1480e80e84fa2ed23e88fd63b1d4927c41cd801')"></div>
-            <span>Friday Night Funkin'</span>
-        </button>
-  <button class="game-card" data-game="game7">
-            <div class="blur-background" style="background-image:url('https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fdordle.io%2Fdata%2Fimage%2Fgame%2Fcookie-clicker.png&f=1&nofb=1&ipt=463b08082116f2be02eb8c24507e36d913033b8607991bef3ac5c8d00959c04c')"></div>
-            <span>Cookie Clicker 2</span>
-        </button>
-    <button class="game-card" data-game="game13">
-            <div class="blur-background" style="background-image:url('https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fimg.poki-cdn.com%2Fcdn-cgi%2Fimage%2Fquality%3D78%2Cwidth%3D1200%2Cheight%3D1200%2Cfit%3Dcover%2Cf%3Dpng%2Fdbd7ba230b41cc5506ca089e6cee1f90.png&f=1&nofb=1&ipt=82c738569755b4090c8211d714a8375f08f3ec6daec53aeecd09bfeee2f0e3bd&ipo=images')"></div>
-            <span>Sprunki Incredibox</span>
-        </button>
-<button class="game-card" data-game="game69">
-            <div class="blur-background" style="background-image:url('https://imgs.crazygames.com/doodle-road_1x1/20240912101140/doodle-road_1x1-cover?format=auto&quality=100&metadata=none&width=1200')"></div>
-            <span>Doodle Road</span>
-
-
-<button class="game-card" data-game="game25">
-            <div class="blur-background" style="background-image:url('https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fgeometrydash-lite.io%2Fupload%2Fcache%2Fupload%2Fimgs%2Fdownload-2023-11-07t155747.299-m240x240.jpg&f=1&nofb=1&ipt=822533559a7a198f7e8b0cc882e552a8d1a6f49b9ce84b0273338d2be2baa2db')"></div>
-            <span>Crazy Roll 3D</span>
-
-
-        </button>
-
+      <button class="game-card" data-game="game1">
+        <div class="blur-background" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/e/e7/Doodle_Jump.png')"></div>
+        <span>Doodle Jump</span>
+      </button>
+      <button class="game-card" data-game="game2">
+        <div class="blur-background" style="background-image:url('https://www.speedrun.com/static/game/9d3mqy6l/cover.png?v=b42fffe')"></div>
+        <span>Flappy Bird</span>
+      </button>
+      <button class="game-card" data-game="game4">
+        <div class="blur-background" style="background-image:url('https://cdn2.steamgriddb.com/icon_thumb/833cc7b10966fa0202801496bffccb37.png?v=b30ad497')"></div>
+        <span>Run 3</span>
+      </button>
+      <button class="game-card" data-game="game3">
+        <div class="blur-background" style="background-image:url('https://static.wikia.nocookie.net/operius/images/3/3f/Operius.png')"></div>
+        <span>Operius</span>
+      </button>
+      <button class="game-card" data-game="game8">
+        <div class="blur-background" style="background-image:url('https://static.wikia.nocookie.net/angrybirds/images/7/70/AngryBirds_Classic_GameIcon_Vector_2.png/revision/latest/scale-to-width-down/250?cb=20220626150110')"></div>
+        <span>Angry Birds</span>
+      </button>
+      <button class="game-card" data-game="game9">
+        <div class="blur-background" style="background-image:url('https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2F26%2F0f%2F15%2F260f15ec775e77a7c1de289e5376389f.jpg&f=1&nofb=1&ipt=6101e1619edc6bb38aa3b9cbe1480e80e84fa2ed23e88fd63b1d4927c41cd801')"></div>
+        <span>Friday Night Funkin'</span>
+      </button>
+      <button class="game-card" data-game="game7">
+        <div class="blur-background" style="background-image:url('https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fdordle.io%2Fdata%2Fimage%2Fgame%2Fcookie-clicker.png&f=1&nofb=1&ipt=463b08082116f2be02eb8c24507e36d913033b8607991bef3ac5c8d00959c04c')"></div>
+        <span>Cookie Clicker 2</span>
+      </button>
+      <button class="game-card" data-game="game13">
+        <div class="blur-background" style="background-image:url('https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fimg.poki-cdn.com%2Fcdn-cgi%2Fimage%2Fquality%3D78%2Cwidth%3D1200%2Cheight%3D1200%2Cfit%3Dcover%2Cf%3Dpng%2Fdbd7ba230b41cc5506ca089e6cee1f90.png&f=1&nofb=1&ipt=82c738569755b4090c8211d714a8375f08f3ec6daec53aeecd09bfeee2f0e3bd&ipo=images')"></div>
+        <span>Sprunki Incredibox</span>
+      </button>
+      <button class="game-card" data-game="game69">
+        <div class="blur-background" style="background-image:url('https://imgs.crazygames.com/doodle-road_1x1/20240912101140/doodle-road_1x1-cover?format=auto&quality=100&metadata=none&width=1200')"></div>
+        <span>Doodle Road</span>
+      </button>
+      <button class="game-card" data-game="game25">
+        <div class="blur-background" style="background-image:url('https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fgeometrydash-lite.io%2Fupload%2Fcache%2Fupload%2Fimgs%2Fdownload-2023-11-07t155747.299-m240x240.jpg&f=1&nofb=1&ipt=822533559a7a198f7e8b0cc882e552a8d1a6f49b9ce84b0273338d2be2baa2db')"></div>
+        <span>Crazy Roll 3D</span>
+      </button>
+      
     </div>
 
     <div class="game-display">
-        <div class="loading-overlay" id="loading" style="display:none;">Loading...</div>
-        <iframe id="game-frame" src=""></iframe>
+      <div class="loading-overlay" id="loading" style="display:none;">Loading...</div>
+      <iframe id="game-frame" src=""></iframe>
     </div>
-</div>
+  </div>
 
-<script>
-    const gameCards = document.querySelectorAll('.game-card');
-    const gameFrame = document.getElementById('game-frame');
-    const loadingOverlay = document.getElementById('loading');
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      
+      // --- NEW CODE ---
+      // Gradient presets from main dashboard
+      const gradients = {
+        purple: 'linear-gradient(135deg, #330033, #001a4d, #660066, #001133)',
+        ocean:  'linear-gradient(135deg, #042a2b, #0b3d91, #0a7c9d, #012a4a)',
+        sunset: 'linear-gradient(135deg, #2a0034, #7b1fa2, #ff6f61, #ff9a3c)',
+        forest: 'linear-gradient(135deg, #0b2e13, #1b4332, #2d6a4f, #081c15)',
+        fire:   'linear-gradient(135deg, #8a1c1c, #d94e1f, #f2b01e, #7a2f0f)',
+        ice:    'linear-gradient(135deg, #0a3a5f, #0f6aa5, #80eaff, #0a2540)',
+        neon:   'linear-gradient(135deg, #ff00cc, #00ffff, #ffff00, #00ff66)',
+        earth:  'linear-gradient(135deg, #3f2a2a, #8b5e3c, #c2b280, #3b5323)',
+        rose:   'linear-gradient(135deg, #3a0a2a, #a83279, #ff5f9e, #ffb3c1)',
+        slate:  'linear-gradient(135deg, #0f172a, #1e293b, #334155, #475569)'
+      };
 
-    const gameUrls = {
+      // Function to apply the gradient
+      const applyGradient = (key) => {
+        const val = gradients[key] || gradients.purple; // Fallback to purple
+        document.documentElement.style.setProperty('--bg-gradient', val);
+      };
+
+      // Load saved settings from main page
+      const loadSavedSettings = () => {
+        const savedGradient = localStorage.getItem('gradient');
+        if (savedGradient && gradients[savedGradient]) {
+          applyGradient(savedGradient);
+        } else {
+          applyGradient('purple'); // Default to purple if nothing saved
+        }
+      };
+      
+      // Run it immediately on load
+      loadSavedSettings();
+      // --- END OF NEW CODE ---
+
+
+      // --- Existing Game Page Code ---
+      const gameCards = document.querySelectorAll('.game-card');
+      const gameFrame = document.getElementById('game-frame');
+      const loadingOverlay = document.getElementById('loading');
+
+      const gameUrls = {
         game1: 'https://html5-games.io/game/doodle-jump/',
         game2: 'https://playcanv.as/p/2OlkUaxF/',
         game4: 'https://mathplayzone.com/wp-content/uploads/assets/run-3/',
         game3: 'https://bitfexl.github.io/operius/',
         game8: 'https://rawcdn.githack.com/lioxryt/lioxryt-assets/0cf7d107ddb99c99ea20387522aa29b8ee382049/other/angrybirds/index.html',
         game9: 'https://w8.snokido.com/games/html5/friday-night-funkin/06201/index.html',
-	  game7: 'https://games-online.io/game/cake-maker/',
+        game7: 'https://games-online.io/game/cake-maker/',
         game13: 'https://sprunk-server.99kkaiba.workers.dev/index.html',
-  game25: 'https://games.crazygames.com/en_US/crazy-roll-3d/index.html?v=1.337',
+        game25: 'https://games.crazygames.com/en_US/crazy-roll-3d/index.html?v=1.337',
+        game69: 'https://crazygames.cdn.msnfun.com/9nw00p8k9kzd/v3/index.html?msstart_sdk_init=eyJwYXJlbnRPcmlnaW4iOiJodHRwczovL3d3dy5tc24uY29tIiwiY2xpZW50SWQiOiIwMjFDQTMwMjYwM0M2MUM3MEJGRUI1NDU2MTNCNjAxRiIsImxvY2FsZSI6ImVuLXVzIiwiZW50cnlQb2ludElkIjoiIiwic3dpdGNoR2FtZVBheWxvYWQiOnsic3dpdGNoZWRUbyI6IjludzAwcDhrOWt6ZCIsInZhbHVlIjp7fX19'
+      };
 
-         game69: 'https://crazygames.cdn.msnfun.com/9nw00p8k9kzd/v3/index.html?msstart_sdk_init=eyJwYXJlbnRPcmlnaW4iOiJodHRwczovL3d3dy5tc24uY29tIiwiY2xpZW50SWQiOiIwMjFDQTMwMjYwM0M2MUM3MEJGRUI1NDU2MTNCNjAxRiIsImxvY2FsZSI6ImVuLXVzIiwiZW50cnlQb2ludElkIjoiIiwic3dpdGNoR2FtZVBheWxvYWQiOnsic3dpdGNoZWRUbyI6IjludzAwcDhrOWt6ZCIsInZhbHVlIjp7fX19'
-
-    };
-
-    gameCards.forEach(card => {
+      gameCards.forEach(card => {
         card.addEventListener('click', () => {
-            const selectedGame = card.getAttribute('data-game');
-            loadingOverlay.style.display = 'flex';
-            gameFrame.style.display = 'block';
+          const selectedGame = card.getAttribute('data-game');
+          loadingOverlay.style.display = 'flex';
+          
+          if (gameUrls[selectedGame]) {
+            gameFrame.src = gameUrls[selectedGame];
 
-            if (gameUrls[selectedGame]) {
-                gameFrame.src = gameUrls[selectedGame];
+            gameFrame.onload = () => {
+              loadingOverlay.style.display = 'none';
+              gameFrame.style.display = 'block'; 
+            };
 
-                gameFrame.onload = () => {
-                    loadingOverlay.style.display = 'none';
-                };
-
-                gameFrame.onerror = () => {
-                    loadingOverlay.style.display = 'none';
-                    alert('Failed to load the game. Please try again later.');
-                };
-            } else {
-                loadingOverlay.style.display = 'none';
-                alert('No game available for this option.');
-            }
+            gameFrame.onerror = () => {
+              loadingOverlay.style.display = 'none';
+              alert('Failed to load the game. Please try again later.');
+            };
+          } else {
+            loadingOverlay.style.display = 'none';
+            alert('No game available for this option.');
+          }
         });
-    });
-</script>
+      });
+    }); // End of DOMContentLoaded
+  </script>
 
 </body>
 </html>
